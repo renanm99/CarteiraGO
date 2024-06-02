@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "name": "Renan",
+    "age": 24,
+    "createdAt": "2024-05-01T15:36:39Z"
+  },
+  {
+    "id": 2,
+    "name": "Hannah",
+    "age": 24,
+    "createdAt": "2024-05-01T15:36:39Z"
+  }
+]

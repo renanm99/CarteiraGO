@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "userid": 1,
+    "title": "Salário",
+    "description": "Salario",
+    "type": "Trabalho",
+    "value": 6000.99,
+    "datetime": "2024-05-31T00:00:00Z",
+    "createdAt": "2024-05-01T15:36:39Z"
+  },
+  {
+    "id": 2,
+    "userid": 2,
+    "title": "Salário",
+    "description": "Salario",
+    "type": "Trabalho",
+    "value": 12599.01,
+    "datetime": "2024-05-31T00:00:00Z",
+    "createdAt": "2024-05-01T15:36:39Z"
+  }
+]
