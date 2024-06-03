@@ -4,7 +4,7 @@ CREATE TABLE customer (
     id serial PRIMARY KEY not null,
     fullname varchar(100) NOT NULL,
     email varchar(100) NOT NULL,
-    password varchar(100) NOT NULL,
+    password char(64) NOT NULL,
     socialname varchar(100)
 );
 
@@ -13,9 +13,6 @@ CREATE unique INDEX idx_customer_id ON customer (id);
 
 -- Índice para a coluna email_user
 CREATE unique INDEX idx_customer_email ON customer (email);
-
--- Índice para a coluna fullname_user
-CREATE unique INDEX idx_customer_fullname ON customer (fullname);
 
 ---
 
