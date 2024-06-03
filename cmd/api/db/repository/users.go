@@ -1,4 +1,4 @@
-package controller
+package repository
 
 import (
 	"carteirago/cmd/api/models"

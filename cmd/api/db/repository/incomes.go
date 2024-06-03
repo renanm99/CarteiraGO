@@ -1,4 +1,4 @@
-package controller
+package repository
 
 import (
 	"carteirago/cmd/api/models"
@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UserGET(c *gin.Context) {
-	route := "user"
+func IncomesGET(c *gin.Context) {
+	route := "incomes"
 	method := c.Request.Method
 	id := c.DefaultQuery("id", "")
 	userid, err := strconv.ParseInt(c.Query("userid"), 10, 8)
@@ -19,7 +19,7 @@ func UserGET(c *gin.Context) {
 		return
 	}
 
-	jsonFile, err := os.Open("/users.json")
+	jsonFile, err := os.Open("/incomes.json")
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -27,38 +27,38 @@ func UserGET(c *gin.Context) {
 
 	jsonParser := json.NewDecoder(jsonFile)
 
-	jsonObject := []models.User{}
+	jsonObject := []models.Incomes{}
 	if err = jsonParser.Decode(&jsonObject); err != nil {
 		c.JSON(401, gin.H{"error": err.Error()})
 		return
 	}
 
-	if jsonObject == nil {
-		c.JSON(204, gin.H{"route": route, "method": method, "userid": userid, "user": ""})
+	if len(jsonObject) == 0 {
+		c.JSON(204, gin.H{"route": route, "method": method, "userid": userid, "incomes": nil})
 		return
 	}
 
-	user := models.User{}
+	incomes := []models.Incomes{}
 
 	for _, element := range jsonObject {
-		if element.Id == int32(userid) {
-			user = element
+		if element.UserId == int32(userid) {
+			incomes = append(incomes, element)
 		}
 	}
 
-	if user.Id == 0 {
+	if len(incomes) == 0 {
 		c.JSON(204, gin.H{"route": route, "method": method, "userid": userid, "incomes": ""})
 		return
 	}
 
 	if id == "" {
-		c.JSON(200, gin.H{"route": route, "method": method, "userid": userid, "user": user})
+		c.JSON(200, gin.H{"route": route, "method": method, "userid": userid, "incomes": incomes})
 		return
 	}
 }
 
-func UserPOST(c *gin.Context) {
-	route := "user"
+func IncomesPOST(c *gin.Context) {
+	route := "incomes"
 	method := c.Request.Method
 	userid := c.Query("userid")
 	id := c.Query("id")

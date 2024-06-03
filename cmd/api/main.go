@@ -2,17 +2,11 @@ package main
 
 import (
 	"carteirago/cmd/api/controller"
-	"fmt"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-
-	time := time.Now()
-	fmt.Println(time)
-
 	r := gin.Default()
 
 	r.GET("/expenses", controller.ExpensesGET)

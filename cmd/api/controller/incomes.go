@@ -9,8 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const repo string = "C:\\dev\\carteirago\\cmd\\api\\db\\repo_data"
-
 func IncomesGET(c *gin.Context) {
 	route := "incomes"
 	method := c.Request.Method
@@ -21,7 +19,7 @@ func IncomesGET(c *gin.Context) {
 		return
 	}
 
-	jsonFile, err := os.Open(repo + "/incomes.json")
+	jsonFile, err := os.Open("/incomes.json")
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
