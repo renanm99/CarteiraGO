@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func ExpensesGET(userid int) (int, []models.Expenses, error) {
+func ExpensesSelect(userid int) (int, []models.Expenses, error) {
 	dbConn := db.Database()
 
 	expenses := []models.Expenses{}
@@ -34,7 +34,7 @@ func ExpensesGET(userid int) (int, []models.Expenses, error) {
 	return http.StatusOK, expenses, nil
 }
 
-func ExpensesPOST(expense *models.Expenses) (int, error) {
+func ExpensesInsert(expense *models.Expenses) (int, error) {
 	dbConn := db.Database()
 	query := fmt.Sprintf("insert into expenses (user_id,	title,	description,	type,	value,	datetime)"+
 		" values (%d,'%s','%s','%s',%f,'%s')",
@@ -55,9 +55,15 @@ func ExpensesPOST(expense *models.Expenses) (int, error) {
 	return http.StatusOK, nil
 }
 
-func ExpensesDelete(userid int32, expenseid int32) (int, error) {
+func ExpensesUpdate(expense *models.Expenses) (int, error) {
 	dbConn := db.Database()
-	query := fmt.Sprintf("delete from expenses where userid = %d and id = %d", userid, expenseid)
+	query := fmt.Sprintf("update expenses set title = '%s', description = '%s', type = '%s', value = %f, "+
+		"datetime = '%s' where userid = %d and id = %d",
+		expense.Title, expense.Description,
+		expense.Type,
+		expense.Value,
+		expense.Datetime.Format(time.DateTime),
+		expense.UserId, expense.Id)
 
 	_, err := dbConn.Exec(query)
 
@@ -70,15 +76,9 @@ func ExpensesDelete(userid int32, expenseid int32) (int, error) {
 	return http.StatusNoContent, nil
 }
 
-func ExpensesUpdate(expense *models.Expenses) (int, error) {
+func ExpensesDelete(userid int, expenseid int) (int, error) {
 	dbConn := db.Database()
-	query := fmt.Sprintf("update expenses set title = '%s', description = '%s', type = '%s', value = %f, "+
-		"datetime = '%s' where userid = %d and id = %d",
-		expense.Title, expense.Description,
-		expense.Type,
-		expense.Value,
-		expense.Datetime.Format(time.DateTime),
-		expense.UserId, expense.Id)
+	query := fmt.Sprintf("delete from expenses where userid = %d and id = %d", userid, expenseid)
 
 	_, err := dbConn.Exec(query)
 

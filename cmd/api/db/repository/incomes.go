@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func IncomesGET(userid int) (int, []models.Incomes, error) {
+func IncomesSelect(userid int) (int, []models.Incomes, error) {
 	dbConn := db.Database()
 
 	incomes := []models.Incomes{}
@@ -34,7 +34,7 @@ func IncomesGET(userid int) (int, []models.Incomes, error) {
 	return http.StatusOK, incomes, nil
 }
 
-func IncomesPOST(income *models.Incomes) (int, error) {
+func IncomesInsert(income *models.Incomes) (int, error) {
 	dbConn := db.Database()
 	query := fmt.Sprintf("insert into incomes (user_id,	title,	description,	type,	value,	datetime)"+
 		" values (%d,'%s','%s','%s',%f,'%s')",
@@ -55,9 +55,15 @@ func IncomesPOST(income *models.Incomes) (int, error) {
 	return http.StatusOK, nil
 }
 
-func IncomesDelete(userid int32, incomeid int32) (int, error) {
+func IncomesUpdate(income *models.Incomes) (int, error) {
 	dbConn := db.Database()
-	query := fmt.Sprintf("delete from incomes where userid = %d and id = %d", userid, incomeid)
+	query := fmt.Sprintf("update incomes set title = '%s', description = '%s', type = '%s', value = %f, "+
+		"datetime = '%s' where userid = %d and id = %d",
+		income.Title, income.Description,
+		income.Type,
+		income.Value,
+		income.Datetime.Format(time.DateTime),
+		income.UserId, income.Id)
 
 	_, err := dbConn.Exec(query)
 
@@ -70,15 +76,9 @@ func IncomesDelete(userid int32, incomeid int32) (int, error) {
 	return http.StatusNoContent, nil
 }
 
-func IncomesUpdate(income *models.Incomes) (int, error) {
+func IncomesDelete(userid int, incomeid int) (int, error) {
 	dbConn := db.Database()
-	query := fmt.Sprintf("update incomes set title = '%s', description = '%s', type = '%s', value = %f, "+
-		"datetime = '%s' where userid = %d and id = %d",
-		income.Title, income.Description,
-		income.Type,
-		income.Value,
-		income.Datetime.Format(time.DateTime),
-		income.UserId, income.Id)
+	query := fmt.Sprintf("delete from incomes where userid = %d and id = %d", userid, incomeid)
 
 	_, err := dbConn.Exec(query)
 

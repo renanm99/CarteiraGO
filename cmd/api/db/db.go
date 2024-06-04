@@ -39,8 +39,6 @@ func Database() *sql.DB {
 		panic(err)
 	}
 
-	fmt.Println("\ndb connected!")
-
 	return db
 }
 

@@ -18,7 +18,7 @@ func ExpensesGET(c *gin.Context) {
 		return
 	}
 
-	code, expenses, err := repository.ExpensesGET(userid)
+	code, expenses, err := repository.ExpensesSelect(userid)
 	if err != nil {
 		c.JSON(code, gin.H{"error": err.Error()})
 		return
@@ -51,9 +51,9 @@ func ExpensesPOST(c *gin.Context) {
 		return
 	}
 
-	expense.UserId = int32(userid)
+	expense.UserId = userid
 
-	code, err := repository.ExpensesPOST(expense)
+	code, err := repository.ExpensesInsert(expense)
 
 	if err != nil {
 		c.JSON(code, gin.H{"error": err.Error()})
@@ -64,7 +64,38 @@ func ExpensesPOST(c *gin.Context) {
 	c.Done()
 }
 
-func ExpensesDelete(c *gin.Context) {
+func ExpensesPUT(c *gin.Context) {
+	route := "expenses"
+	method := c.Request.Method
+	userid, err := strconv.Atoi(c.Query("userid"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	expense := new(models.Expenses)
+
+	err = c.ShouldBindJSON(&expense)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	expense.UserId = userid
+
+	code, err := repository.ExpensesUpdate(expense)
+
+	if err != nil {
+		c.JSON(code, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"route": route, "method": method, "userid": userid, "expenses": expense})
+	c.Done()
+}
+
+func ExpensesDELETE(c *gin.Context) {
 	id, err := strconv.Atoi(c.Query("id"))
 
 	if err != nil {
@@ -79,7 +110,7 @@ func ExpensesDelete(c *gin.Context) {
 		return
 	}
 
-	code, err := repository.ExpensesDelete(int32(userid), int32(id))
+	code, err := repository.ExpensesDelete(userid, id)
 
 	if err != nil {
 		c.JSON(code, gin.H{"error": err.Error()})

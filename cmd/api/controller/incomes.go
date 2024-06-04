@@ -15,11 +15,11 @@ func IncomesGET(c *gin.Context) {
 	id := c.DefaultQuery("id", "")
 	userid, err := strconv.Atoi(c.Query("userid"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	code, incomes, err := repository.IncomesGET(userid)
+	code, incomes, err := repository.IncomesSelect(userid)
 	if err != nil {
 		c.JSON(code, gin.H{"error": err.Error()})
 		return
@@ -54,9 +54,9 @@ func IncomesPOST(c *gin.Context) {
 		return
 	}
 
-	income.UserId = int32(userid)
+	income.UserId = userid
 
-	code, err := repository.IncomesPOST(income)
+	code, err := repository.IncomesInsert(income)
 
 	if err != nil {
 		c.JSON(code, gin.H{"error": err.Error()})
@@ -66,7 +66,37 @@ func IncomesPOST(c *gin.Context) {
 	c.JSON(200, gin.H{"route": route, "method": method, "userid": userid, "incomes": income})
 }
 
-func IncomesDelete(c *gin.Context) {
+func IncomesPUT(c *gin.Context) {
+	route := "incomes"
+	method := c.Request.Method
+	userid, err := strconv.Atoi(c.Query("userid"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	income := new(models.Incomes)
+
+	err = c.ShouldBindJSON(&income)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	income.UserId = userid
+
+	code, err := repository.IncomesUpdate(income)
+
+	if err != nil {
+		c.JSON(code, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"route": route, "method": method, "userid": userid, "incomes": income})
+}
+
+func IncomesDELETE(c *gin.Context) {
 	id, err := strconv.Atoi(c.Query("id"))
 
 	if err != nil {
@@ -81,7 +111,7 @@ func IncomesDelete(c *gin.Context) {
 		return
 	}
 
-	code, err := repository.IncomesDelete(int32(userid), int32(id))
+	code, err := repository.IncomesDelete(userid, id)
 
 	if err != nil {
 		c.JSON(code, gin.H{"error": err.Error()})
