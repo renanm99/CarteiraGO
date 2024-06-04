@@ -15,8 +15,8 @@ func main() {
 	r.GET("/incomes", controller.IncomesGET)
 	r.POST("/incomes", controller.IncomesPOST)
 
-	r.GET("/user", controller.UserGET)
-	r.POST("/user", controller.UserPOST)
+	r.GET("/user", controller.CustomerGET)
+	r.POST("/user", controller.CustomerPOST)
 
 	r.Run(":8080")
 }

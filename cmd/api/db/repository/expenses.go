@@ -37,7 +37,12 @@ func ExpensesGET(userid int) (int, []models.Expenses, error) {
 func ExpensesPOST(expense *models.Expenses) (int, error) {
 	dbConn := db.Database()
 	query := fmt.Sprintf("insert into expenses (user_id,	title,	description,	type,	value,	datetime)"+
-		" values (%d,'%s','%s','%s',%f,'%s')", expense.UserId, expense.Title, expense.Description, expense.Type, expense.Value, expense.Datetime.Format(time.DateTime))
+		" values (%d,'%s','%s','%s',%f,'%s')",
+		expense.UserId,
+		expense.Title, expense.Description,
+		expense.Type,
+		expense.Value,
+		expense.Datetime.Format(time.DateTime))
 
 	_, err := dbConn.Exec(query)
 
@@ -47,5 +52,41 @@ func ExpensesPOST(expense *models.Expenses) (int, error) {
 
 	dbConn.Close()
 
-	return http.StatusExpectationFailed, nil
+	return http.StatusOK, nil
+}
+
+func ExpensesDelete(userid int32, expenseid int32) (int, error) {
+	dbConn := db.Database()
+	query := fmt.Sprintf("delete from expenses where userid = %d and id = %d", userid, expenseid)
+
+	_, err := dbConn.Exec(query)
+
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	dbConn.Close()
+
+	return http.StatusNoContent, nil
+}
+
+func ExpensesUpdate(expense *models.Expenses) (int, error) {
+	dbConn := db.Database()
+	query := fmt.Sprintf("update expenses set title = '%s', description = '%s', type = '%s', value = %f, "+
+		"datetime = '%s' where userid = %d and id = %d",
+		expense.Title, expense.Description,
+		expense.Type,
+		expense.Value,
+		expense.Datetime.Format(time.DateTime),
+		expense.UserId, expense.Id)
+
+	_, err := dbConn.Exec(query)
+
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	dbConn.Close()
+
+	return http.StatusNoContent, nil
 }

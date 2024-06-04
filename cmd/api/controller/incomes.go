@@ -1,9 +1,9 @@
 package controller
 
 import (
+	"carteirago/cmd/api/db/repository"
 	"carteirago/cmd/api/models"
-	"encoding/json"
-	"os"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -13,37 +13,16 @@ func IncomesGET(c *gin.Context) {
 	route := "incomes"
 	method := c.Request.Method
 	id := c.DefaultQuery("id", "")
-	userid, err := strconv.ParseInt(c.Query("userid"), 10, 8)
+	userid, err := strconv.Atoi(c.Query("userid"))
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
-	jsonFile, err := os.Open("/incomes.json")
+	code, incomes, err := repository.IncomesGET(userid)
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(code, gin.H{"error": err.Error()})
 		return
-	}
-
-	jsonParser := json.NewDecoder(jsonFile)
-
-	jsonObject := []models.Incomes{}
-	if err = jsonParser.Decode(&jsonObject); err != nil {
-		c.JSON(401, gin.H{"error": err.Error()})
-		return
-	}
-
-	if len(jsonObject) == 0 {
-		c.JSON(204, gin.H{"route": route, "method": method, "userid": userid, "incomes": nil})
-		return
-	}
-
-	incomes := []models.Incomes{}
-
-	for _, element := range jsonObject {
-		if element.UserId == int32(userid) {
-			incomes = append(incomes, element)
-		}
 	}
 
 	if len(incomes) == 0 {
@@ -60,7 +39,55 @@ func IncomesGET(c *gin.Context) {
 func IncomesPOST(c *gin.Context) {
 	route := "incomes"
 	method := c.Request.Method
-	userid := c.Query("userid")
-	id := c.Query("id")
-	c.JSON(200, gin.H{"route": route, "method": method, "userid": userid, "id": id})
+	userid, err := strconv.Atoi(c.Query("userid"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	income := new(models.Incomes)
+
+	err = c.ShouldBindJSON(&income)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	income.UserId = int32(userid)
+
+	code, err := repository.IncomesPOST(income)
+
+	if err != nil {
+		c.JSON(code, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"route": route, "method": method, "userid": userid, "incomes": income})
+}
+
+func IncomesDelete(c *gin.Context) {
+	id, err := strconv.Atoi(c.Query("id"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userid, err := strconv.Atoi(c.Query("userid"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	code, err := repository.IncomesDelete(int32(userid), int32(id))
+
+	if err != nil {
+		c.JSON(code, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+	c.Done()
 }

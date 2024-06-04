@@ -1,66 +1,92 @@
 package repository
 
 import (
+	"carteirago/cmd/api/db"
 	"carteirago/cmd/api/models"
-	"encoding/json"
-	"os"
-	"strconv"
-
-	"github.com/gin-gonic/gin"
+	"fmt"
+	"net/http"
+	"time"
 )
 
-func IncomesGET(c *gin.Context) {
-	route := "incomes"
-	method := c.Request.Method
-	id := c.DefaultQuery("id", "")
-	userid, err := strconv.ParseInt(c.Query("userid"), 10, 8)
-	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
-		return
-	}
-
-	jsonFile, err := os.Open("/incomes.json")
-	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
-		return
-	}
-
-	jsonParser := json.NewDecoder(jsonFile)
-
-	jsonObject := []models.Incomes{}
-	if err = jsonParser.Decode(&jsonObject); err != nil {
-		c.JSON(401, gin.H{"error": err.Error()})
-		return
-	}
-
-	if len(jsonObject) == 0 {
-		c.JSON(204, gin.H{"route": route, "method": method, "userid": userid, "incomes": nil})
-		return
-	}
+func IncomesGET(userid int) (int, []models.Incomes, error) {
+	dbConn := db.Database()
 
 	incomes := []models.Incomes{}
+	query := fmt.Sprintf("select * from incomes where user_id = %d", userid)
+	rows, err := dbConn.Query(query)
 
-	for _, element := range jsonObject {
-		if element.UserId == int32(userid) {
-			incomes = append(incomes, element)
+	if err != nil {
+		return http.StatusInternalServerError, nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		income := new(models.Incomes)
+		if err := rows.Scan(&income.Id, &income.UserId, &income.Title, &income.Description, &income.Type, &income.Value, &income.Datetime); err != nil {
+			return http.StatusInternalServerError, nil, err
 		}
+		incomes = append(incomes, *income)
 	}
 
-	if len(incomes) == 0 {
-		c.JSON(204, gin.H{"route": route, "method": method, "userid": userid, "incomes": ""})
-		return
-	}
+	dbConn.Close()
 
-	if id == "" {
-		c.JSON(200, gin.H{"route": route, "method": method, "userid": userid, "incomes": incomes})
-		return
-	}
+	return http.StatusOK, incomes, nil
 }
 
-func IncomesPOST(c *gin.Context) {
-	route := "incomes"
-	method := c.Request.Method
-	userid := c.Query("userid")
-	id := c.Query("id")
-	c.JSON(200, gin.H{"route": route, "method": method, "userid": userid, "id": id})
+func IncomesPOST(income *models.Incomes) (int, error) {
+	dbConn := db.Database()
+	query := fmt.Sprintf("insert into incomes (user_id,	title,	description,	type,	value,	datetime)"+
+		" values (%d,'%s','%s','%s',%f,'%s')",
+		income.UserId,
+		income.Title, income.Description,
+		income.Type,
+		income.Value,
+		income.Datetime.Format(time.DateTime))
+
+	_, err := dbConn.Exec(query)
+
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	dbConn.Close()
+
+	return http.StatusOK, nil
+}
+
+func IncomesDelete(userid int32, incomeid int32) (int, error) {
+	dbConn := db.Database()
+	query := fmt.Sprintf("delete from incomes where userid = %d and id = %d", userid, incomeid)
+
+	_, err := dbConn.Exec(query)
+
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	dbConn.Close()
+
+	return http.StatusNoContent, nil
+}
+
+func IncomesUpdate(income *models.Incomes) (int, error) {
+	dbConn := db.Database()
+	query := fmt.Sprintf("update incomes set title = '%s', description = '%s', type = '%s', value = %f, "+
+		"datetime = '%s' where userid = %d and id = %d",
+		income.Title, income.Description,
+		income.Type,
+		income.Value,
+		income.Datetime.Format(time.DateTime),
+		income.UserId, income.Id)
+
+	_, err := dbConn.Exec(query)
+
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	dbConn.Close()
+
+	return http.StatusNoContent, nil
 }

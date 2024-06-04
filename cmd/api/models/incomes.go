@@ -3,12 +3,11 @@ package models
 import "time"
 
 type Incomes struct {
-	Id          int64     `json: "id" binding:"required"`
-	UserId      int32     `json: "userid" binding:"required"`
-	Title       string    `json: "title" binding:"required"`
-	Description string    `json: "description" binding:"required"`
-	Type        string    `json: "type" binding:"required"`
-	Value       float32   `json: "value" binding:"required"`
-	Datetime    time.Time `json: "datetime" binding:"required"`
-	CreatedAt   time.Time `json: "createdAt"`
+	Id          int64     `db: "id"	json: "id"`
+	UserId      int32     `db: "user_id"	json: "user_id"`
+	Title       string    `db: "title"	json: "title"`
+	Description string    `db: "description"	json: "description"`
+	Type        string    `db: "type"	json: "type"`
+	Value       float32   `db: "value"	json: "value"`
+	Datetime    time.Time `db: "datetime"	json: "datetime"`
 }
