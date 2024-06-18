@@ -5,14 +5,18 @@ import (
 	"carteirago/cmd/api/models"
 	"fmt"
 	"net/http"
-	"time"
+	"strconv"
 )
 
-func ExpensesSelect(userid int) (int, []models.Expenses, error) {
+func ExpensesSelect(id string) (int, []models.Expenses, error) {
 	dbConn := db.Database()
 
+	userid, err := strconv.Atoi(id)
+	if err != nil {
+		return http.StatusInternalServerError, nil, err
+	}
 	expenses := []models.Expenses{}
-	query := fmt.Sprintf("select * from expenses where user_id = %d", userid)
+	query := fmt.Sprintf("select * from expenses where user_id = %d order by id", userid)
 	rows, err := dbConn.Query(query)
 
 	if err != nil {
@@ -20,6 +24,7 @@ func ExpensesSelect(userid int) (int, []models.Expenses, error) {
 	}
 
 	defer rows.Close()
+	defer dbConn.Close()
 
 	for rows.Next() {
 		expense := new(models.Expenses)
@@ -37,14 +42,15 @@ func ExpensesSelect(userid int) (int, []models.Expenses, error) {
 func ExpensesInsert(expense *models.Expenses) (int, error) {
 	dbConn := db.Database()
 	query := fmt.Sprintf("insert into expenses (user_id,	title,	description,	type,	value,	datetime)"+
-		" values (%d,'%s','%s','%s',%f,'%s')",
+		" values (%d,'%s','%s','%s',%f, NOW()::timestamp)",
 		expense.UserId,
 		expense.Title, expense.Description,
 		expense.Type,
-		expense.Value,
-		expense.Datetime.Format(time.DateTime))
+		expense.Value)
 
 	_, err := dbConn.Exec(query)
+
+	defer dbConn.Close()
 
 	if err != nil {
 		return http.StatusInternalServerError, err
@@ -57,12 +63,11 @@ func ExpensesInsert(expense *models.Expenses) (int, error) {
 
 func ExpensesUpdate(expense *models.Expenses) (int, error) {
 	dbConn := db.Database()
-	query := fmt.Sprintf("update expenses set title = '%s', description = '%s', type = '%s', value = %f, "+
-		"datetime = '%s' where userid = %d and id = %d",
+	query := fmt.Sprintf("update expenses set title = '%s', description = '%s', type = '%s', value = %f "+
+		" where user_id = %d and id = %d",
 		expense.Title, expense.Description,
 		expense.Type,
 		expense.Value,
-		expense.Datetime.Format(time.DateTime),
 		expense.UserId, expense.Id)
 
 	_, err := dbConn.Exec(query)
@@ -78,9 +83,11 @@ func ExpensesUpdate(expense *models.Expenses) (int, error) {
 
 func ExpensesDelete(userid int, expenseid int) (int, error) {
 	dbConn := db.Database()
-	query := fmt.Sprintf("delete from expenses where userid = %d and id = %d", userid, expenseid)
+	query := fmt.Sprintf("delete from expenses where user_id = %d and id = %d", userid, expenseid)
 
 	_, err := dbConn.Exec(query)
+
+	defer dbConn.Close()
 
 	if err != nil {
 		return http.StatusInternalServerError, err

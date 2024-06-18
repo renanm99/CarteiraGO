@@ -5,14 +5,13 @@ import (
 	"carteirago/cmd/api/models"
 	"fmt"
 	"net/http"
-	"time"
 )
 
 func IncomesSelect(userid int) (int, []models.Incomes, error) {
 	dbConn := db.Database()
 
 	incomes := []models.Incomes{}
-	query := fmt.Sprintf("select * from incomes where user_id = %d", userid)
+	query := fmt.Sprintf("select * from incomes where user_id = %d order by id", userid)
 	rows, err := dbConn.Query(query)
 
 	if err != nil {
@@ -20,6 +19,7 @@ func IncomesSelect(userid int) (int, []models.Incomes, error) {
 	}
 
 	defer rows.Close()
+	defer dbConn.Close()
 
 	for rows.Next() {
 		income := new(models.Incomes)
@@ -37,14 +37,15 @@ func IncomesSelect(userid int) (int, []models.Incomes, error) {
 func IncomesInsert(income *models.Incomes) (int, error) {
 	dbConn := db.Database()
 	query := fmt.Sprintf("insert into incomes (user_id,	title,	description,	type,	value,	datetime)"+
-		" values (%d,'%s','%s','%s',%f,'%s')",
+		" values (%d,'%s','%s','%s',%f, NOW()::timestamp)",
 		income.UserId,
 		income.Title, income.Description,
 		income.Type,
-		income.Value,
-		income.Datetime.Format(time.DateTime))
+		income.Value)
 
 	_, err := dbConn.Exec(query)
+
+	defer dbConn.Close()
 
 	if err != nil {
 		return http.StatusInternalServerError, err
@@ -57,12 +58,11 @@ func IncomesInsert(income *models.Incomes) (int, error) {
 
 func IncomesUpdate(income *models.Incomes) (int, error) {
 	dbConn := db.Database()
-	query := fmt.Sprintf("update incomes set title = '%s', description = '%s', type = '%s', value = %f, "+
-		"datetime = '%s' where userid = %d and id = %d",
+	query := fmt.Sprintf("update incomes set title = '%s', description = '%s', type = '%s', value = %f "+
+		" where user_id = %d and id = %d",
 		income.Title, income.Description,
 		income.Type,
 		income.Value,
-		income.Datetime.Format(time.DateTime),
 		income.UserId, income.Id)
 
 	_, err := dbConn.Exec(query)
@@ -78,9 +78,11 @@ func IncomesUpdate(income *models.Incomes) (int, error) {
 
 func IncomesDelete(userid int, incomeid int) (int, error) {
 	dbConn := db.Database()
-	query := fmt.Sprintf("delete from incomes where userid = %d and id = %d", userid, incomeid)
+	query := fmt.Sprintf("delete from incomes where user_id = %d and id = %d", userid, incomeid)
 
 	_, err := dbConn.Exec(query)
+
+	defer dbConn.Close()
 
 	if err != nil {
 		return http.StatusInternalServerError, err

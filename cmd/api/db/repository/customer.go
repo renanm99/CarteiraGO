@@ -91,18 +91,20 @@ func HashPwd(pwd string) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-func CheckPwd(userid int, pwd string) bool {
+func CheckPwd(email string, pwd string) int {
 	dbConn := db.Database()
 
 	h := sha256.New()
-	h.Write([]byte(pwd))
+	pass := fmt.Sprintf("%s%s", pwd, email)
+	h.Write([]byte(pass))
 	check := fmt.Sprintf("%x", h.Sum(nil))
-	query := fmt.Sprintf("select id from customer where id = %d and password = '%s'", userid, check)
+	query := fmt.Sprintf("select id from customer where email = '%s' and password = '%s'", email, check)
 
 	var id int
 	if err := dbConn.QueryRow(query).Scan(&id); err != nil {
 		id = 0
 	}
+
 	dbConn.Close()
-	return id > 0
+	return id
 }

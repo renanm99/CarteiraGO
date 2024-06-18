@@ -12,7 +12,6 @@ import (
 func IncomesGET(c *gin.Context) {
 	route := "incomes"
 	method := c.Request.Method
-	id := c.DefaultQuery("id", "")
 	userid, err := strconv.Atoi(c.Query("userid"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -26,12 +25,8 @@ func IncomesGET(c *gin.Context) {
 	}
 
 	if len(incomes) == 0 {
-		c.JSON(204, gin.H{"route": route, "method": method, "userid": userid, "incomes": ""})
-		return
-	}
-
-	if id == "" {
-		c.JSON(200, gin.H{"route": route, "method": method, "userid": userid, "incomes": incomes})
+		c.JSON(http.StatusOK, gin.H{"route": route, "method": method, "userid": userid, "incomes": ""})
+		c.Done()
 		return
 	}
 }
@@ -64,6 +59,8 @@ func IncomesPOST(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{"route": route, "method": method, "userid": userid, "incomes": income})
+	c.Done()
+	return
 }
 
 func IncomesPUT(c *gin.Context) {
@@ -94,6 +91,8 @@ func IncomesPUT(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{"route": route, "method": method, "userid": userid, "incomes": income})
+	c.Done()
+	return
 }
 
 func IncomesDELETE(c *gin.Context) {
@@ -120,4 +119,5 @@ func IncomesDELETE(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 	c.Done()
+	return
 }

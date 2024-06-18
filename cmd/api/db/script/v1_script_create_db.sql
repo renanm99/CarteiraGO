@@ -15,7 +15,6 @@ CREATE unique INDEX idx_customer_id ON customer (id);
 CREATE unique INDEX idx_customer_email ON customer (email);
 
 ---
-
 CREATE TABLE incomes (
     id serial PRIMARY KEY not null,
     user_id integer references customer(id),
@@ -28,6 +27,7 @@ CREATE TABLE incomes (
 
 -- Índice para a coluna id
 CREATE unique INDEX idx_incomes_id ON incomes (id);
+
 
 -- Índice para a coluna id_user
 CREATE INDEX idx_incomes_user_id ON incomes (user_id);
@@ -45,7 +45,8 @@ CREATE TABLE expenses (
 );
 
 -- Índice para a coluna id
-CREATE UNIQUE INDEX idx_expenses_id ON expenses (id);
+
+CREATE unique INDEX idx_expenses_id ON expenses (id);
 
 -- Índice para a coluna id_user
 CREATE INDEX idx_expenses_user_id ON expenses (user_id);

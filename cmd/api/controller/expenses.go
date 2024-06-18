@@ -12,25 +12,39 @@ import (
 func ExpensesGET(c *gin.Context) {
 	route := "expenses"
 	method := c.Request.Method
-	userid, err := strconv.Atoi(c.Query("userid"))
+	/*
+		userid, err := strconv.Atoi(c.Query("userid"))
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	*/
+	user, token, err := getCookieHandler(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(401, gin.H{"error": err.Error()})
 		return
 	}
 
-	code, expenses, err := repository.ExpensesSelect(userid)
+	if err := verifyToken(token); err != nil {
+		c.JSON(401, gin.H{"error": err.Error()})
+		return
+	}
+
+	code, expenses, err := repository.ExpensesSelect(user)
 	if err != nil {
 		c.JSON(code, gin.H{"error": err.Error()})
 		return
 	}
 
 	if len(expenses) == 0 {
-		c.JSON(http.StatusNoContent, gin.H{"route": route, "method": method, "userid": userid, "incomes": ""})
+		c.JSON(http.StatusOK, gin.H{"route": route, "method": method, "expenses": ""})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"route": route, "method": method, "userid": userid, "expenses": expenses})
+	c.JSON(http.StatusOK, gin.H{"route": route, "method": method, "expenses": expenses})
 	c.Done()
+	return
 }
 
 func ExpensesPOST(c *gin.Context) {
@@ -44,7 +58,6 @@ func ExpensesPOST(c *gin.Context) {
 	}
 
 	expense := new(models.Expenses)
-
 	err = c.ShouldBindJSON(&expense)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -62,6 +75,7 @@ func ExpensesPOST(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"route": route, "method": method, "userid": userid, "expenses": expense})
 	c.Done()
+	return
 }
 
 func ExpensesPUT(c *gin.Context) {
@@ -75,7 +89,7 @@ func ExpensesPUT(c *gin.Context) {
 	}
 
 	expense := new(models.Expenses)
-
+	expense.UserId = userid
 	err = c.ShouldBindJSON(&expense)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -93,6 +107,7 @@ func ExpensesPUT(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"route": route, "method": method, "userid": userid, "expenses": expense})
 	c.Done()
+	return
 }
 
 func ExpensesDELETE(c *gin.Context) {
@@ -119,4 +134,5 @@ func ExpensesDELETE(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 	c.Done()
+	return
 }
