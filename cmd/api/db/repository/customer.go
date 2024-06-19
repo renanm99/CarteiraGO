@@ -24,6 +24,22 @@ func CustomerSelect(userid int) (int, *models.Customer, error) {
 	return http.StatusOK, customer, nil
 }
 
+func CustomerCheck(email string) int {
+	dbConn := db.Database()
+
+	query := fmt.Sprintf("select id from customer where email = '%s'", email)
+	row := dbConn.QueryRow(query)
+
+	var Id int
+	if err := row.Scan(&Id); err != nil {
+		Id = 0
+	}
+
+	dbConn.Close()
+
+	return Id
+}
+
 func CustomerInsert(customer *models.Customer) (int, error) {
 
 	dbConn := db.Database()

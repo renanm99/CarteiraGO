@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ExpensesGET(c *gin.Context) {
+func AccountsGET(c *gin.Context) {
 	id, token, err := getCookieHandler(c)
 	if err != nil {
 		c.JSON(401, gin.H{"error": err.Error()})
@@ -27,22 +27,28 @@ func ExpensesGET(c *gin.Context) {
 		return
 	}
 
-	code, expenses, err := repository.ExpensesSelect(userid)
+	accountType := c.Request.Header["Account"][0]
+	if accountType == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "no header account type"})
+		return
+	}
+
+	code, accounts, err := repository.AccountsSelect(userid, accountType)
 	if err != nil {
 		c.JSON(code, gin.H{"error": err.Error()})
 		return
 	}
 
-	if len(expenses) == 0 {
-		c.JSON(http.StatusOK, gin.H{"expenses": ""})
+	if len(accounts) == 0 {
+		c.JSON(http.StatusOK, gin.H{"accounts": ""})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"expenses": expenses})
+	c.JSON(http.StatusOK, gin.H{"accounts": accounts})
 	c.Done()
 }
 
-func ExpensesPOST(c *gin.Context) {
+func AccountsPOST(c *gin.Context) {
 	id, token, err := getCookieHandler(c)
 	if err != nil {
 		c.JSON(401, gin.H{"error": err.Error()})
@@ -60,56 +66,16 @@ func ExpensesPOST(c *gin.Context) {
 		return
 	}
 
-	expense := new(models.Expenses)
-	err = c.ShouldBindJSON(&expense)
+	account := new(models.Accounts)
+	err = c.ShouldBindJSON(&account)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	expense.UserId = userid
+	account.UserId = userid
 
-	code, err := repository.ExpensesInsert(expense)
-
-	if err != nil {
-		c.JSON(code, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.String(http.StatusOK, "")
-	c.Done()
-	return
-}
-
-func ExpensesPUT(c *gin.Context) {
-	id, token, err := getCookieHandler(c)
-	if err != nil {
-		c.JSON(401, gin.H{"error": err.Error()})
-		return
-	}
-
-	if err := verifyToken(token); err != nil {
-		c.JSON(401, gin.H{"error": err.Error()})
-		return
-	}
-
-	userid, err := strconv.Atoi(id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	expense := new(models.Expenses)
-
-	err = c.ShouldBindJSON(&expense)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	expense.UserId = userid
-
-	code, err := repository.ExpensesUpdate(expense)
+	code, err := repository.AccountsInsert(account)
 
 	if err != nil {
 		c.JSON(code, gin.H{"error": err.Error()})
@@ -118,10 +84,50 @@ func ExpensesPUT(c *gin.Context) {
 
 	c.String(http.StatusOK, "")
 	c.Done()
-	return
+
 }
 
-func ExpensesDELETE(c *gin.Context) {
+func AccountsPUT(c *gin.Context) {
+	id, token, err := getCookieHandler(c)
+	if err != nil {
+		c.JSON(401, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := verifyToken(token); err != nil {
+		c.JSON(401, gin.H{"error": err.Error()})
+		return
+	}
+
+	userid, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	account := new(models.Accounts)
+
+	err = c.ShouldBindJSON(&account)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	account.UserId = userid
+
+	code, err := repository.AccountsUpdate(account)
+
+	if err != nil {
+		c.JSON(code, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.String(http.StatusOK, "")
+	c.Done()
+
+}
+
+func AccountsDELETE(c *gin.Context) {
 
 	user, token, err := getCookieHandler(c)
 	if err != nil {
@@ -140,14 +146,20 @@ func ExpensesDELETE(c *gin.Context) {
 		return
 	}
 
-	expense := new(models.Expenses)
-	err = c.ShouldBindJSON(&expense)
+	account := new(models.Accounts)
+	err = c.ShouldBindJSON(&account)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	code, err := repository.ExpensesDelete(userid, expense.Id)
+	accountType := c.Request.Header["Account"][0]
+	if accountType == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "no header account type"})
+		return
+	}
+
+	code, err := repository.AccountsDelete(userid, account.Id, accountType)
 
 	if err != nil {
 		c.JSON(code, gin.H{"error": err.Error()})
@@ -156,5 +168,44 @@ func ExpensesDELETE(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 	c.Done()
-	return
+
+}
+
+func DashboardAccounts(c *gin.Context) {
+	id, token, err := getCookieHandler(c)
+	if err != nil {
+		c.JSON(401, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := verifyToken(token); err != nil {
+		c.JSON(401, gin.H{"error": err.Error()})
+		return
+	}
+
+	userid, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	account := c.Request.Header["Account"][0]
+	if account == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "no header account type"})
+		return
+	}
+
+	code, accounts, err := repository.DashboardSelect(userid, account)
+	if err != nil {
+		c.JSON(code, gin.H{"error": err.Error()})
+		return
+	}
+
+	if len(accounts) == 0 {
+		c.JSON(http.StatusOK, gin.H{"dashboard": ""})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"dashboard": accounts})
+	c.Done()
 }

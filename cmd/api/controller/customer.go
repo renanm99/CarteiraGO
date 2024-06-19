@@ -10,8 +10,6 @@ import (
 )
 
 func CustomerGET(c *gin.Context) {
-	route := "customer"
-	method := c.Request.Method
 	id := c.DefaultQuery("id", "")
 	userid, err := strconv.Atoi(c.Query("userid"))
 	if err != nil {
@@ -26,35 +24,30 @@ func CustomerGET(c *gin.Context) {
 	}
 
 	if customer.Id == 0 {
-		c.JSON(204, gin.H{"route": route, "method": method, "userid": userid, "incomes": ""})
+		c.String(204, "")
 		return
 	}
 
 	if id == "" {
-		c.JSON(200, gin.H{"route": route, "method": method, "userid": userid, "customer": customer})
+		c.String(200, "")
 		return
 	}
 }
 
 func CustomerPOST(c *gin.Context) {
-	route := "customer"
-	method := c.Request.Method
-	userid, err := strconv.Atoi(c.Query("userid"))
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
 
 	customer := new(models.Customer)
 
-	err = c.ShouldBindJSON(&customer)
+	err := c.ShouldBindJSON(&customer)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	customer.Id = userid
+	if id := repository.CustomerCheck(customer.Email); id > 0 {
+		c.JSON(http.StatusOK, gin.H{"code": "409"})
+		return
+	}
 
 	code, err := repository.CustomerInsert(customer)
 
@@ -63,7 +56,7 @@ func CustomerPOST(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, gin.H{"route": route, "method": method, "userid": userid, "customer": customer})
+	c.String(200, "")
 }
 
 func CustomerPUT(c *gin.Context) {

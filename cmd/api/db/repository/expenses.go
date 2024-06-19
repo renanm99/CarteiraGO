@@ -5,16 +5,11 @@ import (
 	"carteirago/cmd/api/models"
 	"fmt"
 	"net/http"
-	"strconv"
 )
 
-func ExpensesSelect(id string) (int, []models.Expenses, error) {
+func ExpensesSelect(userid int) (int, []models.Expenses, error) {
 	dbConn := db.Database()
 
-	userid, err := strconv.Atoi(id)
-	if err != nil {
-		return http.StatusInternalServerError, nil, err
-	}
 	expenses := []models.Expenses{}
 	query := fmt.Sprintf("select * from expenses where user_id = %d order by id", userid)
 	rows, err := dbConn.Query(query)
