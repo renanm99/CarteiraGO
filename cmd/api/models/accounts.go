@@ -16,6 +16,7 @@ type Accounts struct {
 }
 
 type Dashboard struct {
-	Category string  `db: "category"`
-	Value    float32 `db: "value"`
+	Category string    `db: "category"`
+	Value    float32   `db: "value"`
+	Datetime time.Time `db: datetime`
 }

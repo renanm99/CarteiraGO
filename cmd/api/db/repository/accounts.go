@@ -99,7 +99,7 @@ func DashboardSelect(userid int, account string) (int, []models.Dashboard, error
 	dbConn := db.Database()
 
 	accounts := []models.Dashboard{}
-	query := fmt.Sprintf("select category,sum(value) as value FROM %s WHERE user_id = %d group by category", account, userid)
+	query := fmt.Sprintf("select category, value, datetime from %s WHERE user_id = %d", account, userid)
 	rows, err := dbConn.Query(query)
 
 	if err != nil {
@@ -111,7 +111,7 @@ func DashboardSelect(userid int, account string) (int, []models.Dashboard, error
 
 	for rows.Next() {
 		account := new(models.Dashboard)
-		if err := rows.Scan(&account.Category, &account.Value); err != nil {
+		if err := rows.Scan(&account.Category, &account.Value, &account.Datetime); err != nil {
 			return http.StatusInternalServerError, nil, err
 		}
 		accounts = append(accounts, *account)
