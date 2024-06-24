@@ -9,6 +9,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func SlashGet(c *gin.Context) {
+
+	c.String(http.StatusOK, "Hi")
+	c.Done()
+}
+
 func AccountsGET(c *gin.Context) {
 	id, token, err := getCookieHandler(c)
 	if err != nil {

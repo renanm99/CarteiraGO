@@ -12,7 +12,7 @@ func main() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"},
 		AllowCredentials: true,
 		AllowHeaders:     []string{"Account", "Origin", "Content-Type", "Authorization"},
@@ -26,7 +26,7 @@ func main() {
 		r.PUT("/expenses", controller.ExpensesPUT)
 		r.DELETE("/expenses", controller.ExpensesDELETE)
 	*/
-
+	r.GET("/", controller.SlashGet)
 	r.GET("/expenses", controller.AccountsGET)
 	r.POST("/expenses", controller.AccountsPOST)
 	r.PUT("/expenses", controller.AccountsPUT)
