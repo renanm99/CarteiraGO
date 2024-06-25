@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 
@@ -15,19 +16,20 @@ const (
 	dbname = "db_carteirago"
 )
 
-func Database() *sql.DB {
+func Database() (*sql.DB, error) {
 	host, user, password, env, dbname := DatabaseConstants()
 	psqlInfo := fmt.Sprintf("host=%s\nuser=%s\n"+
 		"password=%s\ndbname=%s\nsslmode=disable",
 		host, user, password, dbname)
 
 	if !env {
-		panic("os env password empty")
+		//panic("os env password empty")
+		return nil, errors.New("os env password empty")
 	}
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	//fmt.Println(psqlInfo)
@@ -36,13 +38,13 @@ func Database() *sql.DB {
 
 	err = db.Ping()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return db
+	return db, nil
 }
 
 func DatabaseConstants() (string, string, string, bool, string) {
-	key, env := os.LookupEnv("SUPABASE_KEY")
+	key, env := os.LookupEnv("supabase_key")
 	return host, user, key, env, dbname
 }

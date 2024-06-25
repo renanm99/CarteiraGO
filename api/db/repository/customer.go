@@ -1,15 +1,15 @@
 package repository
 
 import (
-	"carteirago/cmd/api/db"
-	"carteirago/cmd/api/models"
+	"carteirago/api/db"
+	"carteirago/api/models"
 	"crypto/sha256"
 	"fmt"
 	"net/http"
 )
 
 func CustomerSelect(userid int) (int, *models.Customer, error) {
-	dbConn := db.Database()
+	dbConn, _ := db.Database()
 
 	query := fmt.Sprintf("select * from customer where user_id = %d", userid)
 	row := dbConn.QueryRow(query)
@@ -25,7 +25,7 @@ func CustomerSelect(userid int) (int, *models.Customer, error) {
 }
 
 func CustomerCheck(email string) int {
-	dbConn := db.Database()
+	dbConn, _ := db.Database()
 
 	query := fmt.Sprintf("select id from customer where email = '%s'", email)
 	row := dbConn.QueryRow(query)
@@ -42,7 +42,7 @@ func CustomerCheck(email string) int {
 
 func CustomerInsert(customer *models.Customer) (int, error) {
 
-	dbConn := db.Database()
+	dbConn, _ := db.Database()
 	query := fmt.Sprintf("insert into customer (fullname,	email,	password,	socialname)"+
 		" values ('%s','%s','%s','%s')",
 		customer.Fullname,
@@ -62,7 +62,7 @@ func CustomerInsert(customer *models.Customer) (int, error) {
 }
 
 func CustomerUpdate(customer *models.Customer) (int, error) {
-	dbConn := db.Database()
+	dbConn, _ := db.Database()
 	query := fmt.Sprintf("update customer set fullname = '%s', email = '%s', password = '%s', socialname = %s, "+
 		"where id = %d",
 		customer.Fullname,
@@ -83,7 +83,7 @@ func CustomerUpdate(customer *models.Customer) (int, error) {
 }
 
 func CustomerDelete(userid int) (int, error) {
-	dbConn := db.Database()
+	dbConn, _ := db.Database()
 	query := fmt.Sprintf("delete from expenses where user_id = %d; "+
 		"delete from incomes where user_id = %d; "+
 		"delete from customer where id = %d;",
@@ -108,7 +108,7 @@ func HashPwd(pwd string) string {
 }
 
 func CheckPwd(email string, pwd string) int {
-	dbConn := db.Database()
+	dbConn, _ := db.Database()
 
 	h := sha256.New()
 	pass := fmt.Sprintf("%s%s", pwd, email)

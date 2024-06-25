@@ -1,7 +1,7 @@
 package main
 
 import (
-	"carteirago/cmd/api/controller"
+	"carteirago/api/controller"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -12,7 +12,7 @@ func main() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     []string{"https://carteira-go-front.vercel.app"},
 		AllowMethods:     []string{"GET", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"},
 		AllowCredentials: true,
 		AllowHeaders:     []string{"Account", "Origin", "Content-Type", "Authorization"},
@@ -20,12 +20,6 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	/*
-		r.GET("/expenses", controller.ExpensesGET)
-		r.POST("/expenses", controller.ExpensesPOST)
-		r.PUT("/expenses", controller.ExpensesPUT)
-		r.DELETE("/expenses", controller.ExpensesDELETE)
-	*/
 	r.GET("/", controller.SlashGet)
 	r.GET("/expenses", controller.AccountsGET)
 	r.POST("/expenses", controller.AccountsPOST)
@@ -49,5 +43,5 @@ func main() {
 
 	r.GET("/Dash", controller.DashboardAccounts)
 
-	r.Run(":8080")
+	r.Run()
 }

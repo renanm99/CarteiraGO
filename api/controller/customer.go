@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"carteirago/cmd/api/db/repository"
-	"carteirago/cmd/api/models"
+	"carteirago/api/db/repository"
+	"carteirago/api/models"
 	"net/http"
 	"strconv"
 

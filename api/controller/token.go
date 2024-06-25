@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"carteirago/cmd/api/db/repository"
-	"carteirago/cmd/api/models"
+	"carteirago/api/db/repository"
+	"carteirago/api/models"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -71,19 +71,19 @@ func LoginHandler(c *gin.Context) {
 }
 
 func DeleteCookie(c *gin.Context) {
-	c.SetCookie("user", "", -1, "/", "localhost", false, true)
-	c.SetCookie("token", "", -1, "/", "localhost", false, true)
+	c.SetCookie("user", "", -1, "/", "https://carteira-go-front.vercel.app/", false, true)
+	c.SetCookie("token", "", -1, "/", "https://carteira-go-front.vercel.app/", false, true)
 	c.String(http.StatusNoContent, "log out")
 	c.Done()
 	//c.String(http.StatusOK, "Cookie has been deleted")
 }
 
 func setCookieHandler(c *gin.Context, email string, jwt string) {
-	c.SetSameSite(http.SameSiteStrictMode)
+	c.SetSameSite(http.SameSiteNoneMode)
 	_, _, err := getCookieHandler(c)
 	if err != nil {
-		c.SetCookie("user", email, 3600, "/", "localhost", false, true)
-		c.SetCookie("token", jwt, 3600, "/", "localhost", false, true)
+		c.SetCookie("user", email, 3600, "/", "", true, false)
+		c.SetCookie("token", jwt, 3600, "/", "", true, false)
 	}
 }
 

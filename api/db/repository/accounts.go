@@ -1,14 +1,14 @@
 package repository
 
 import (
-	"carteirago/cmd/api/db"
-	"carteirago/cmd/api/models"
+	"carteirago/api/db"
+	"carteirago/api/models"
 	"fmt"
 	"net/http"
 )
 
 func AccountsSelect(userid int, account string) (int, []models.Accounts, error) {
-	dbConn := db.Database()
+	dbConn, _ := db.Database()
 
 	accounts := []models.Accounts{}
 	query := fmt.Sprintf("select * from %s where user_id = %d order by id", account, userid)
@@ -35,7 +35,7 @@ func AccountsSelect(userid int, account string) (int, []models.Accounts, error) 
 }
 
 func AccountsInsert(account *models.Accounts) (int, error) {
-	dbConn := db.Database()
+	dbConn, _ := db.Database()
 	query := fmt.Sprintf("insert into %s (user_id,title,description,category,value,datetime)"+
 		" values (%d,'%s','%s','%s',%f, NOW()::timestamp)",
 		account.Account,
@@ -58,7 +58,7 @@ func AccountsInsert(account *models.Accounts) (int, error) {
 }
 
 func AccountsUpdate(account *models.Accounts) (int, error) {
-	dbConn := db.Database()
+	dbConn, _ := db.Database()
 	query := fmt.Sprintf("update %s set title='%s',description='%s',category='%s',value=%f"+
 		" where user_id=%d and id = %d",
 		account.Account,
@@ -79,7 +79,7 @@ func AccountsUpdate(account *models.Accounts) (int, error) {
 }
 
 func AccountsDelete(userid int, accountid int, account string) (int, error) {
-	dbConn := db.Database()
+	dbConn, _ := db.Database()
 	query := fmt.Sprintf("delete from %s where user_id = %d and id = %d", account, userid, accountid)
 
 	_, err := dbConn.Exec(query)
@@ -96,7 +96,7 @@ func AccountsDelete(userid int, accountid int, account string) (int, error) {
 }
 
 func DashboardSelect(userid int, account string) (int, []models.Dashboard, error) {
-	dbConn := db.Database()
+	dbConn, _ := db.Database()
 
 	accounts := []models.Dashboard{}
 	query := fmt.Sprintf("select category, value, datetime from %s WHERE user_id = %d", account, userid)
