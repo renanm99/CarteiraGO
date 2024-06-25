@@ -71,8 +71,8 @@ func LoginHandler(c *gin.Context) {
 }
 
 func DeleteCookie(c *gin.Context) {
-	c.SetCookie("user", "", -1, "/", "https://carteira-go-front.vercel.app/", false, true)
-	c.SetCookie("token", "", -1, "/", "https://carteira-go-front.vercel.app/", false, true)
+	c.SetCookie("user", "", -1, "/", "", false, true)
+	c.SetCookie("token", "", -1, "/", "", false, true)
 	c.String(http.StatusNoContent, "log out")
 	c.Done()
 	//c.String(http.StatusOK, "Cookie has been deleted")
