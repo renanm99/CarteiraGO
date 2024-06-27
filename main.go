@@ -12,7 +12,7 @@ func main() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://carteirago.vercel.app/"},
+		AllowOrigins:     []string{"https://carteirago.vercel.app"},
 		AllowMethods:     []string{"GET", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"},
 		AllowCredentials: true,
 		AllowHeaders:     []string{"Account", "Origin", "Content-Type", "Authorization"},

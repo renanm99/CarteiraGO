@@ -71,8 +71,8 @@ func LoginHandler(c *gin.Context) {
 }
 
 func DeleteCookie(c *gin.Context) {
-	c.SetCookie("user", "", -1, "/", "", false, true)
-	c.SetCookie("token", "", -1, "/", "", false, true)
+	c.SetCookie("user", "", -1, "/", "https://carteirago.rj.r.appspot.com", true, true)
+	c.SetCookie("token", "", -1, "/", "https://carteirago.rj.r.appspot.com", true, true)
 	c.String(http.StatusNoContent, "log out")
 	c.Done()
 	//c.String(http.StatusOK, "Cookie has been deleted")
@@ -82,8 +82,8 @@ func setCookieHandler(c *gin.Context, email string, jwt string) {
 	c.SetSameSite(http.SameSiteNoneMode)
 	_, _, err := getCookieHandler(c)
 	if err != nil {
-		c.SetCookie("user", email, 3600, "/", "", true, false)
-		c.SetCookie("token", jwt, 3600, "/", "", true, false)
+		c.SetCookie("user", email, 3600, "/", "https://carteirago.rj.r.appspot.com", true, true)
+		c.SetCookie("token", jwt, 3600, "/", "https://carteirago.rj.r.appspot.com", true, true)
 	}
 }
 
