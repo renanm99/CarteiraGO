@@ -1,18 +1,22 @@
 package main
 
 import (
-	"carteirago/api/controller"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/renanm99/carteirago/api/controller"
 )
 
+var url_app string = getEnv()
+
 func main() {
+
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://carteirago.vercel.app"},
+		AllowOrigins:     []string{url_app},
 		AllowMethods:     []string{"GET", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"},
 		AllowCredentials: true,
 		AllowHeaders:     []string{"Account", "Origin", "Content-Type", "Authorization"},
@@ -44,4 +48,16 @@ func main() {
 	r.GET("/Dash", controller.DashboardAccounts)
 
 	r.Run()
+
+}
+
+func getEnv() string {
+	env := os.Getenv("APP_ENV")
+	var url string
+	if env == "dev" {
+		url = "http://localhost:3000"
+	} else if env == "prod" {
+		url = "https://carteirago.renanmachado.dev.br"
+	}
+	return url
 }

@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	host   = "aws-0-sa-east-1.pooler.supabase.com"
-	port   = "6543"
-	user   = "postgres.upglzprsczdxnepvajzm"
-	dbname = "db_carteirago"
+	host   string = "aws-0-sa-east-1.pooler.supabase.com"
+	port   string = "6543"
+	user   string = "postgres.upglzprsczdxnepvajzm"
+	dbname string = "db_carteirago"
 )
 
 func Database() (*sql.DB, error) {
