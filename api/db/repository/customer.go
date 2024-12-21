@@ -1,11 +1,12 @@
 package repository
 
 import (
-	"carteirago/api/db"
-	"carteirago/api/models"
 	"crypto/sha256"
 	"fmt"
 	"net/http"
+
+	"github.com/renanm99/carteirago/api/db"
+	"github.com/renanm99/carteirago/api/models"
 )
 
 func CustomerSelect(userid int) (int, *models.Customer, error) {

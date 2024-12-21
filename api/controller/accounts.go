@@ -1,13 +1,13 @@
 package controller
 
 import (
-	"carteirago/api/db"
-	"carteirago/api/db/repository"
-	"carteirago/api/models"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/renanm99/carteirago/api/db"
+	"github.com/renanm99/carteirago/api/db/repository"
+	"github.com/renanm99/carteirago/api/models"
 )
 
 func SlashGet(c *gin.Context) {

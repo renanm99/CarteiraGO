@@ -1,10 +1,11 @@
 package repository
 
 import (
-	"carteirago/api/db"
-	"carteirago/api/models"
 	"fmt"
 	"net/http"
+
+	"github.com/renanm99/carteirago/api/db"
+	"github.com/renanm99/carteirago/api/models"
 )
 
 func AccountsSelect(userid int, account string) (int, []models.Accounts, error) {

@@ -1,15 +1,16 @@
 package controller
 
 import (
-	"carteirago/api/db/repository"
-	"carteirago/api/models"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/renanm99/carteirago/api/db/repository"
+	"github.com/renanm99/carteirago/api/models"
 )
 
 var secretKey = []byte("secret-key")
@@ -47,6 +48,14 @@ func verifyToken(tokenString string) error {
 
 func LoginHandler(c *gin.Context) {
 
+	url := ""
+	env := getEnv()
+	if env == "dev" {
+		url = "http://localhost:3000"
+	} else if env == "prod" {
+		url = "https://carteirago.renanmachado.dev.br"
+	}
+
 	user := new(models.Customer)
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
@@ -61,7 +70,7 @@ func LoginHandler(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		setCookieHandler(c, strconv.Itoa(id), tokenString)
+		setCookieHandler(c, strconv.Itoa(id), tokenString, url)
 		c.JSON(http.StatusOK, gin.H{"code": 200})
 		c.Done()
 	} else {
@@ -71,20 +80,28 @@ func LoginHandler(c *gin.Context) {
 }
 
 func DeleteCookie(c *gin.Context) {
-	c.SetSameSite(http.SameSiteNoneMode)
-	c.SetCookie("user", "", -1, "/", "carteirago.onrender.com", true, true)
-	c.SetCookie("token", "", -1, "/", "carteirago.onrender.com", true, true)
+	url := ""
+	env := getEnv()
+	if env == "dev" {
+		url = "http://localhost:3000"
+	} else if env == "prod" {
+		url = "https://carteirago.renanmachado.dev.br"
+	}
+
+	c.SetSameSite(http.SameSiteDefaultMode)
+	c.SetCookie("user", "", -1, "/", url, true, true)
+	c.SetCookie("token", "", -1, "/", url, true, true)
 	c.String(http.StatusOK, "log out")
 	c.Done()
 	//c.String(http.StatusOK, "Cookie has been deleted")
 }
 
-func setCookieHandler(c *gin.Context, email string, jwt string) {
-	c.SetSameSite(http.SameSiteNoneMode)
+func setCookieHandler(c *gin.Context, email string, jwt string, url string) {
+	c.SetSameSite(http.SameSiteDefaultMode)
 	_, _, err := getCookieHandler(c)
 	if err != nil {
-		c.SetCookie("user", email, 3600, "/", "carteirago.onrender.com", true, true)
-		c.SetCookie("token", jwt, 3600, "/", "carteirago.onrender.com", true, true)
+		c.SetCookie("user", email, 3600, "/", url, true, true)
+		c.SetCookie("token", jwt, 3600, "/", url, true, true)
 	}
 }
 
@@ -112,4 +129,8 @@ func CheckSignin(c *gin.Context) {
 	}
 	c.String(http.StatusOK, "log in")
 	c.Done()
+}
+
+func getEnv() string {
+	return os.Getenv("APP_ENV")
 }
